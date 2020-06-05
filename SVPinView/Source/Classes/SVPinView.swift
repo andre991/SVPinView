@@ -52,6 +52,21 @@ public class SVPinView: UIView {
     @IBInspectable public var fieldCornerRadius: CGFloat = 0
     @IBInspectable public var activeFieldCornerRadius: CGFloat = 0
     
+    @IBInspectable public var fieldShadowColor: CGColor? = nil
+    @IBInspectable public var activeFieldShadowColor: CGColor? = UIColor.black.cgColor
+    
+    @IBInspectable public var fieldShadowOffset: CGSize = .zero
+    @IBInspectable public var activeFieldShadowOffset: CGSize = CGSize(width: 1.0, height: 2.0)
+    
+    @IBInspectable public var fieldShadowOpacity: Float = 0
+    @IBInspectable public var activeFieldShadowOpacity: Float = 0.4
+    
+    @IBInspectable public var fieldShadowRadius: CGFloat = 0
+    @IBInspectable public var activeFieldShadowRadius: CGFloat = 3
+    
+    @IBInspectable public var fieldShadowPath: CGPath? = nil
+    @IBInspectable public var activeFieldShadowPath: CGPath? = nil
+    
     public var style: SVPinViewStyle = .underline
     
     public var font: UIFont = UIFont.systemFont(ofSize: 15)
@@ -185,9 +200,18 @@ public class SVPinView: UIView {
             underLine.constraints.filter { ($0.identifier == "underlineHeight") }.first?.constant = thickness
         }
         
+        func setupShadow() {
+            containerView.layer.shadowColor = isActive ? activeFieldShadowColor : fieldShadowColor
+            containerView.layer.shadowOffset = isActive ? activeFieldShadowOffset : fieldShadowOffset
+            containerView.layer.shadowRadius = isActive ? activeFieldShadowRadius : activeFieldShadowRadius
+            containerView.layer.shadowOpacity = isActive ? activeFieldShadowOpacity : fieldShadowOpacity
+            containerView.layer.shadowPath = isActive ? activeFieldShadowPath : fieldShadowPath
+        }
+        
         switch style {
         case .none:
             setupUnderline(color: UIColor.clear, withThickness: 0)
+            setupShadow()
             containerView.layer.borderWidth = 0
             containerView.layer.borderColor = UIColor.clear.cgColor
         case .underline:
@@ -197,6 +221,7 @@ public class SVPinView: UIView {
             containerView.layer.borderColor = UIColor.clear.cgColor
         case .box:
             setupUnderline(color: UIColor.clear, withThickness: 0)
+            setupShadow()
             containerView.layer.borderWidth = isActive ? activeBorderLineThickness : borderLineThickness
             containerView.layer.borderColor = isActive ? activeBorderLineColor.cgColor : borderLineColor.cgColor
         }
