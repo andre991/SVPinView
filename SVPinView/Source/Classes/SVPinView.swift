@@ -102,7 +102,7 @@ public class SVPinView: UIView {
         collectionView.register(collectionViewNib, forCellWithReuseIdentifier: reuseIdentifier)
         flowLayout.scrollDirection = .vertical
         collectionView.isScrollEnabled = false
-        collectionView.layer.masksToBounds = true
+        collectionView.layer.masksToBounds = false
         self.addSubview(view)
         view.frame = bounds
         view.autoresizingMask = [UIView.AutoresizingMask.flexibleWidth, UIView.AutoresizingMask.flexibleHeight]
