@@ -431,6 +431,7 @@ extension SVPinView : UITextFieldDelegate
     }
 }
 extension UICollectionViewCell {
+    
     func shadowDecorate() {
         let radius: CGFloat = 10
         contentView.layer.cornerRadius = radius
