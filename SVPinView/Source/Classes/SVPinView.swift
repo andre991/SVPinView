@@ -102,7 +102,7 @@ public class SVPinView: UIView {
         collectionView.register(collectionViewNib, forCellWithReuseIdentifier: reuseIdentifier)
         flowLayout.scrollDirection = .vertical
         collectionView.isScrollEnabled = false
-                
+        //        collectionView.layer.masksToBounds = true
         self.addSubview(view)
         view.frame = bounds
         view.autoresizingMask = [UIView.AutoresizingMask.flexibleWidth, UIView.AutoresizingMask.flexibleHeight]
@@ -206,12 +206,13 @@ public class SVPinView: UIView {
             containerView.layer.shadowRadius = isActive ? activeFieldShadowRadius : activeFieldShadowRadius
             containerView.layer.shadowOpacity = isActive ? activeFieldShadowOpacity : fieldShadowOpacity
             containerView.layer.shadowPath = isActive ? activeFieldShadowPath : fieldShadowPath
+            containerView.layer.masksToBounds = false
         }
         
         switch style {
         case .none:
             setupUnderline(color: UIColor.clear, withThickness: 0)
-            setupShadow()
+            //            setupShadow()
             containerView.layer.borderWidth = 0
             containerView.layer.borderColor = UIColor.clear.cgColor
         case .underline:
@@ -221,11 +222,11 @@ public class SVPinView: UIView {
             containerView.layer.borderColor = UIColor.clear.cgColor
         case .box:
             setupUnderline(color: UIColor.clear, withThickness: 0)
-            setupShadow()
+            //            setupShadow()
             containerView.layer.borderWidth = isActive ? activeBorderLineThickness : borderLineThickness
             containerView.layer.borderColor = isActive ? activeBorderLineColor.cgColor : borderLineColor.cgColor
         }
-     }
+    }
     
     @IBAction fileprivate func refreshPinView() {
         view.removeFromSuperview()
@@ -275,27 +276,27 @@ public class SVPinView: UIView {
         
         password = []
         for (index,char) in pin.enumerated() {
-
+            
             guard index < pinLength else { return }
-
+            
             //Get the first textField
             guard let textField = collectionView.cellForItem(at: IndexPath(item: index, section: 0))?.viewWithTag(101 + index) as? SVPinField,
                 let placeholderLabel = collectionView.cellForItem(at: IndexPath(item: index, section: 0))?.viewWithTag(400) as? UILabel
-            else {
-                showPinError(error: "ERR-103: Type Mismatch - Line 257")
-                return
+                else {
+                    showPinError(error: "ERR-103: Type Mismatch - Line 257")
+                    return
             }
-
+            
             textField.text = String(char)
             placeholderLabel.isHidden = true
-
+            
             //secure text after a bit
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
                 if textField.text != "" {
                     if self.shouldSecureText { textField.text = self.secureCharacter } else {}
                 }
             })
-
+            
             // store text
             password.append(String(char))
             validateAndSendCallback()
@@ -312,14 +313,14 @@ extension SVPinView : UICollectionViewDataSource, UICollectionViewDelegate, UICo
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath)
-        
+        cell.shadowDecorate()
         guard let textField = cell.viewWithTag(100) as? SVPinField,
             let containerView = cell.viewWithTag(51),
             let underLine = cell.viewWithTag(50),
             let placeholderLabel = cell.viewWithTag(400) as? UILabel
-        else {
-            showPinError(error: "ERR-104: Tag Mismatch - Line 291")
-            return UICollectionViewCell()
+            else {
+                showPinError(error: "ERR-104: Tag Mismatch - Line 291")
+                return UICollectionViewCell()
         }
         
         // Setting up textField
@@ -339,7 +340,6 @@ extension SVPinView : UICollectionViewDataSource, UICollectionViewDelegate, UICo
         
         placeholderLabel.text = ""
         placeholderLabel.textColor = self.textColor.withAlphaComponent(0.5)
-        
         stylePinField(containerView: containerView, underLine: underLine, isActive: false)
         
         // Make the Pin field the first responder
@@ -409,14 +409,14 @@ extension SVPinView : UITextFieldDelegate
         } else { showPinError(error: "ERR-105: Type Mismatch - Line 377") }
         
         if let containerView = textField.superview?.viewWithTag(51),
-        let underLine = textField.superview?.viewWithTag(50) {
+            let underLine = textField.superview?.viewWithTag(50) {
             self.stylePinField(containerView: containerView, underLine: underLine, isActive: true)
         } else { showPinError(error: "ERR-106: Type Mismatch - Line 387") }
     }
     
     public func textFieldDidEndEditing(_ textField: UITextField) {
         if let containerView = textField.superview?.viewWithTag(51),
-        let underLine = textField.superview?.viewWithTag(50) {
+            let underLine = textField.superview?.viewWithTag(50) {
             self.stylePinField(containerView: containerView, underLine: underLine, isActive: false)
         } else { showPinError(error: "ERR-107: Type Mismatch - Line 394") }
     }
@@ -428,5 +428,22 @@ extension SVPinView : UITextFieldDelegate
             return false
         }
         return true
+    }
+}
+extension UICollectionViewCell {
+    func shadowDecorate() {
+        let radius: CGFloat = 10
+        contentView.layer.cornerRadius = radius
+        contentView.layer.borderWidth = 1
+        contentView.layer.borderColor = UIColor.clear.cgColor
+        contentView.layer.masksToBounds = true
+        
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOffset = CGSize(width: 0, height: 1.0)
+        layer.shadowRadius = 2.0
+        layer.shadowOpacity = 0.5
+        layer.masksToBounds = false
+        layer.shadowPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius).cgPath
+        layer.cornerRadius = radius
     }
 }
