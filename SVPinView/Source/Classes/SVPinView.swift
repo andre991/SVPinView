@@ -200,19 +200,9 @@ public class SVPinView: UIView {
             underLine.constraints.filter { ($0.identifier == "underlineHeight") }.first?.constant = thickness
         }
         
-        func setupShadow() {
-            containerView.layer.shadowColor = isActive ? activeFieldShadowColor : fieldShadowColor
-            containerView.layer.shadowOffset = isActive ? activeFieldShadowOffset : fieldShadowOffset
-            containerView.layer.shadowRadius = isActive ? activeFieldShadowRadius : activeFieldShadowRadius
-            containerView.layer.shadowOpacity = isActive ? activeFieldShadowOpacity : fieldShadowOpacity
-            containerView.layer.shadowPath = isActive ? activeFieldShadowPath : fieldShadowPath
-            containerView.layer.masksToBounds = false
-        }
-        
         switch style {
         case .none:
             setupUnderline(color: UIColor.clear, withThickness: 0)
-            //            setupShadow()
             containerView.layer.borderWidth = 0
             containerView.layer.borderColor = UIColor.clear.cgColor
         case .underline:
@@ -222,7 +212,6 @@ public class SVPinView: UIView {
             containerView.layer.borderColor = UIColor.clear.cgColor
         case .box:
             setupUnderline(color: UIColor.clear, withThickness: 0)
-            //            setupShadow()
             containerView.layer.borderWidth = isActive ? activeBorderLineThickness : borderLineThickness
             containerView.layer.borderColor = isActive ? activeBorderLineColor.cgColor : borderLineColor.cgColor
         }
@@ -313,7 +302,9 @@ extension SVPinView : UICollectionViewDataSource, UICollectionViewDelegate, UICo
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath)
-        cell.shadowDecorate()
+        
+        cell.shadowDecorate(cornerRadius: 8, color: .black, alpha: 0.2, x: 0, y: 0, blur: 10, spread: -1)
+        
         guard let textField = cell.viewWithTag(100) as? SVPinField,
             let containerView = cell.viewWithTag(51),
             let underLine = cell.viewWithTag(50),
@@ -432,19 +423,58 @@ extension SVPinView : UITextFieldDelegate
 }
 extension UICollectionViewCell {
     
-    func shadowDecorate() {
-        let radius: CGFloat = 10
-        contentView.layer.cornerRadius = radius
+    func shadowDecorate(
+        cornerRadius: CGFloat,
+        color: UIColor = .black,
+        alpha: Float = 0.5,
+        x: CGFloat = 0,
+        y: CGFloat = 2,
+        blur: CGFloat = 4,
+        spread: CGFloat = 0) {
+        
+        contentView.layer.cornerRadius = cornerRadius
         contentView.layer.borderWidth = 1
         contentView.layer.borderColor = UIColor.clear.cgColor
         contentView.layer.masksToBounds = true
         
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOffset = CGSize(width: 0, height: 1.0)
-        layer.shadowRadius = 2.0
-        layer.shadowOpacity = 0.5
+        layer.shadowColor = color.cgColor
+        layer.shadowOffset = CGSize(width: x, height: y)
+        layer.shadowRadius = blur / 2
+        layer.shadowOpacity = alpha
         layer.masksToBounds = false
-        layer.shadowPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius).cgPath
-        layer.cornerRadius = radius
+        
+        if spread == 0 {
+            layer.shadowPath = nil
+        } else {
+            let dx = -spread
+            let rect = bounds.insetBy(dx: dx, dy: dx)
+            layer.shadowPath = UIBezierPath(rect: rect).cgPath
+        }
+        layer.cornerRadius = cornerRadius
     }
 }
+//
+////swiftlint:disable identifier_name
+//extension CALayer {
+//    func applySketchShadow(
+//        color: UIColor = .black,
+//        alpha: Float = 0.5,
+//        x: CGFloat = 0,
+//        y: CGFloat = 2,
+//        blur: CGFloat = 4,
+//        spread: CGFloat = 0) {
+//
+//        shadowColor = color.cgColor
+//        shadowOpacity = alpha
+//        shadowOffset = CGSize(width: x, height: y)
+//        shadowRadius = blur / 2.0
+//
+//        if spread == 0 {
+//            shadowPath = nil
+//        } else {
+//            let dx = -spread
+//            let rect = bounds.insetBy(dx: dx, dy: dx)
+//            shadowPath = UIBezierPath(rect: rect).cgPath
+//        }
+//    }
+//}
